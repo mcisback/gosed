@@ -19,3 +19,8 @@ Example replace:
 ```bash
 history | gx '^[\d\s]+' 'replacement'
 ```
+
+Remove nth line:
+```bash
+history | gx -d 5 # remove line number 5 (start counting from 1)
+```
