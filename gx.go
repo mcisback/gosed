@@ -15,16 +15,17 @@ func main() {
 
 	pattern := os.Args[1]
 
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Invalid regex: %v\n", err)
+		os.Exit(1)
+	}
+
+	scanner := bufio.NewScanner(os.Stdin)
+
 	if len(os.Args) == 3 {
 		replacement := os.Args[2]
-
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid regex: %v\n", err)
-			os.Exit(1)
-		}
-
-		scanner := bufio.NewScanner(os.Stdin)
+		
 		for scanner.Scan() {
 			line := scanner.Text()
 			
@@ -39,13 +40,6 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid regex: %v\n", err)
-			os.Exit(1)
-		}
-
-		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			line := scanner.Text()
 			if re.MatchString(line) {
