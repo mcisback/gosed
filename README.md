@@ -24,3 +24,12 @@ Remove nth line:
 ```bash
 history | gx -d 5 # remove line number 5 (start counting from 1)
 ```
+Delete matching lines:
+```bash
+echo file.txt | gx 'Sublime/d' # remove all lines containing sublime
+```
+
+Use instead of tr:
+```bash
+echo $PATH | gx ':' '\n'
+```

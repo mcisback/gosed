@@ -21,13 +21,14 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	if deletePattern != "0" {
-		deletePatternHandler(scanner, deletePattern)
+	args := os.Args
+
+	// Delete mode
+	if deletePattern != "0" || (len(args) >= 2 && strings.HasSuffix(args[1], "/d")) {
+		deletePatternHandler(scanner, args[1])
 
 		os.Exit(0)
 	}
-
-	args := os.Args
 
 	if len(args) < 2 {
 		fmt.Printf("Usage:\n\t%s \n", os.Args[0])
@@ -48,6 +49,7 @@ func main() {
 	}
 
 	if len(args) == 3 {
+		// Replace
 		replacement := args[2]
 
 		replacement = strings.ReplaceAll(replacement, "\\n", "\n")
@@ -68,6 +70,7 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
+		// Print Matching
 		for scanner.Scan() {
 			line := scanner.Text()
 			if re.MatchString(line) {
@@ -90,11 +93,14 @@ func isInt(s string) bool {
 }
 
 func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
+	// fmt.Println("deletePatternHandler", deletePattern)
+
 	lineCount := 1
 
 	var lineToDelete int
 
 	rangeRegex := regexp.MustCompile(`^(\d+):(\d+)$`)
+	deleteMatchingLinesRegex := regexp.MustCompile(`^(.+)/d$`)
 	// rangeRegex := regexp.MustCompile(`^([=><])(\d+):(\d+)$`)
 
 	if isInt(deletePattern) {
@@ -119,6 +125,24 @@ func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
 			line := scanner.Text()
 
 			if !(lineCount >= start && lineCount <= end) {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	} else if deleteMatchingLinesRegex.MatchString(deletePattern) {
+		// fmt.Println("deleteMatchingLinesRegex")
+
+		matches := deleteMatchingLinesRegex.FindStringSubmatch(deletePattern)
+
+		pattern := matches[1]
+
+		re := regexp.MustCompile(pattern)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if !re.MatchString(line) {
 				fmt.Println(line)
 			}
 
