@@ -6,37 +6,25 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	var deleteLine int
+	var deletePattern string
 
-	// Bind -d to deleteLine variable (default 0, description)
-	flag.IntVar(&deleteLine, "d", 0, "Line number to delete")
+	// Bind -d to deletePattern variable (default 0, description)
+	flag.StringVar(&deletePattern, "d", "0", "Line number to delete")
 
 	// Parse the command-line arguments
 	flag.Parse()
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	if deleteLine != 0 {
-		lineCount := 1
-		for scanner.Scan() {
-			line := scanner.Text()
+	if deletePattern != "0" {
+		deletePatternHandler(scanner, deletePattern)
 
-			if lineCount != deleteLine {
-				fmt.Println(line)
-			}
-
-			lineCount++
-		}
-
-		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
-			os.Exit(1)
-		}
-
-		return
+		os.Exit(0)
 	}
 
 	args := os.Args
@@ -51,7 +39,7 @@ func main() {
 
 	pattern := args[1]
 
-	// pattern = strings.ReplaceAll(pattern, ":nl:", "\n")
+	pattern = strings.ReplaceAll(pattern, "\\n", "\n")
 
 	re, err := regexp.Compile(pattern)
 	if err != nil {
@@ -62,14 +50,16 @@ func main() {
 	if len(args) == 3 {
 		replacement := args[2]
 
-		// replacement = strings.ReplaceAll(replacement, ":nl:", "\n")
+		replacement = strings.ReplaceAll(replacement, "\\n", "\n")
+
+		fmt.Printf("REPLACEMENT: %s\n", replacement)
 
 		for scanner.Scan() {
 			line := scanner.Text()
 
 			if re.MatchString(line) {
 				result := re.ReplaceAllString(line, replacement)
-				fmt.Println(result)
+				fmt.Printf("%s\n", result)
 			}
 		}
 
@@ -91,4 +81,53 @@ func main() {
 		}
 	}
 
+}
+
+// FIX: works also for negative numbers
+func isInt(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
+
+func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
+	lineCount := 1
+
+	var lineToDelete int
+
+	rangeRegex := regexp.MustCompile(`^(\d+):(\d+)$`)
+	// rangeRegex := regexp.MustCompile(`^([=><])(\d+):(\d+)$`)
+
+	if isInt(deletePattern) {
+		lineToDelete, _ = strconv.Atoi(deletePattern)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if lineCount != lineToDelete {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	} else if rangeRegex.MatchString(deletePattern) {
+		matches := rangeRegex.FindStringSubmatch(deletePattern)
+
+		start, _ := strconv.Atoi(matches[2])
+		end, _ := strconv.Atoi(matches[3])
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if !(lineCount >= start && lineCount <= end) {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
+		os.Exit(1)
+	}
 }
