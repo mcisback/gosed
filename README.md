@@ -33,3 +33,13 @@ Use instead of tr:
 ```bash
 echo $PATH | gx ':' '\n'
 ```
+
+Highlight every line containing bash:
+```bash
+echo README.md | gx 'bash/b' # 
+```
+
+Load from file instead of STDIN:
+```bash
+gx -f README.md 'bash/b'
+```
