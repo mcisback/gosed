@@ -104,7 +104,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(args) >= 2 && !boldMode {
+	if len(args) >= 2 {
 		// Replace
 		replacement := args[1]
 
@@ -116,9 +116,14 @@ func main() {
 			line := scanner.Text()
 
 			if re.MatchString(line) {
-				result := re.ReplaceAllString(line, replacement)
-				fmt.Printf("%s\n", result)
+				line = re.ReplaceAllString(line, replacement)
+
+				// if boldMode {
+				line = bold(line)
+				// }
 			}
+
+			fmt.Println(line)
 		}
 
 		if err := scanner.Err(); err != nil {
