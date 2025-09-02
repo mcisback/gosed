@@ -22,8 +22,14 @@ history | gx '^[\d\s]+' 'replacement'
 
 Remove nth line:
 ```bash
-history | gx -d 5 # remove line number 5 (start counting from 1)
+history | gx '5/d' # remove line number 5 (start counting from 1)
 ```
+
+Remove nth:mth range lines:
+```bash
+history | gx '5:10/d' # remove lines from number 5 to 10 (start counting from 1)
+```
+
 Delete matching lines:
 ```bash
 echo file.txt | gx 'Sublime/d' # remove all lines containing sublime

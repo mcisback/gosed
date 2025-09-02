@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	var deletePattern string
+	// var deletePattern string
 	var path string
 
 	boldMode := false
@@ -21,7 +21,7 @@ func main() {
 	bold := color.New(color.Bold).SprintFunc()
 
 	// Bind -d to deletePattern variable (default 0, description)
-	flag.StringVar(&deletePattern, "d", "0", "Line number to delete")
+	// flag.StringVar(&deletePattern, "d", "0", "Line number to delete")
 	flag.StringVar(&path, "f", "", "File to open (Defaults to stdin)")
 
 	// Parse the command-line arguments
@@ -74,16 +74,18 @@ func main() {
 
 	scanner := bufio.NewScanner(inputFile)
 
-	// Delete mode
-	if deletePattern != "0" {
-		deletePatternHandler(scanner, deletePattern)
+	// // Delete mode
+	// if deletePattern != "0" {
+	// 	deletePatternHandler(scanner, deletePattern)
 
-		os.Exit(0)
-	}
+	// 	os.Exit(0)
+	// }
 
 	pattern := args[0]
 
 	if strings.HasSuffix(pattern, "/d") {
+		pattern = pattern[:len(pattern)-2]
+
 		deletePatternHandler(scanner, pattern)
 
 		os.Exit(0)
@@ -176,15 +178,11 @@ func isInt(s string) bool {
 }
 
 func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
-	// fmt.Println("deletePatternHandler", deletePattern)
-
 	lineCount := 1
 
 	var lineToDelete int
 
 	rangeRegex := regexp.MustCompile(`^(\d+):(\d+)$`)
-	deleteMatchingLinesRegex := regexp.MustCompile(`^(.+)/d$`)
-	// rangeRegex := regexp.MustCompile(`^([=><])(\d+):(\d+)$`)
 
 	if isInt(deletePattern) {
 		lineToDelete, _ = strconv.Atoi(deletePattern)
@@ -201,8 +199,8 @@ func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
 	} else if rangeRegex.MatchString(deletePattern) {
 		matches := rangeRegex.FindStringSubmatch(deletePattern)
 
-		start, _ := strconv.Atoi(matches[2])
-		end, _ := strconv.Atoi(matches[3])
+		start, _ := strconv.Atoi(matches[1])
+		end, _ := strconv.Atoi(matches[2])
 
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -213,14 +211,8 @@ func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
 
 			lineCount++
 		}
-	} else if deleteMatchingLinesRegex.MatchString(deletePattern) {
-		// fmt.Println("deleteMatchingLinesRegex")
-
-		matches := deleteMatchingLinesRegex.FindStringSubmatch(deletePattern)
-
-		pattern := matches[1]
-
-		re := regexp.MustCompile(pattern)
+	} else {
+		re := regexp.MustCompile(deletePattern)
 
 		for scanner.Scan() {
 			line := scanner.Text()
