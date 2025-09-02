@@ -74,19 +74,20 @@ func main() {
 
 	scanner := bufio.NewScanner(inputFile)
 
-	// // Delete mode
-	// if deletePattern != "0" {
-	// 	deletePatternHandler(scanner, deletePattern)
-
-	// 	os.Exit(0)
-	// }
-
 	pattern := args[0]
 
 	if strings.HasSuffix(pattern, "/d") {
 		pattern = pattern[:len(pattern)-2]
 
 		deletePatternHandler(scanner, pattern)
+
+		os.Exit(0)
+	}
+
+	if strings.HasSuffix(pattern, "/m") {
+		pattern = pattern[:len(pattern)-2]
+
+		showPatternHandler(scanner, pattern)
 
 		os.Exit(0)
 	}
@@ -218,6 +219,61 @@ func deletePatternHandler(scanner *bufio.Scanner, deletePattern string) {
 			line := scanner.Text()
 
 			if !re.MatchString(line) {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func showPatternHandler(scanner *bufio.Scanner, showPattern string) {
+	lineCount := 1
+
+	var lineToShow int
+
+	rangeRegex := regexp.MustCompile(`^(\d+):(\d+)$`)
+
+	if isInt(showPattern) {
+		lineToShow, _ = strconv.Atoi(showPattern)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if lineCount == lineToShow {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	} else if rangeRegex.MatchString(showPattern) {
+		matches := rangeRegex.FindStringSubmatch(showPattern)
+
+		start, _ := strconv.Atoi(matches[1])
+		end, _ := strconv.Atoi(matches[2])
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if lineCount >= start && lineCount <= end {
+				fmt.Println(line)
+			}
+
+			lineCount++
+		}
+	} else {
+		// FIX: rendundant
+		re := regexp.MustCompile(showPattern)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if re.MatchString(line) {
 				fmt.Println(line)
 			}
 

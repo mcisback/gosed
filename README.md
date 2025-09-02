@@ -27,12 +27,22 @@ history | gx '5/d' # remove line number 5 (start counting from 1)
 
 Remove nth:mth range lines:
 ```bash
-history | gx '5:10/d' # remove lines from number 5 to 10 (start counting from 1)
+history | gx '5:10/d' # Remove lines from number 5 to 10 (start counting from 1)
 ```
 
 Delete matching lines:
 ```bash
-echo file.txt | gx 'Sublime/d' # remove all lines containing sublime
+echo file.txt | gx 'Sublime/d' # Remove all lines containing sublime
+```
+
+Show nth line:
+```bash
+history | gx '5/m' # Show line number 5 (start counting from 1)
+```
+
+Show nth:mth range lines:
+```bash
+history | gx '5:10/m' # Show lines from number 5 to 10 (start counting from 1)
 ```
 
 Use instead of tr:
@@ -42,7 +52,7 @@ echo $PATH | gx ':' '\n'
 
 Highlight every line containing bash:
 ```bash
-echo README.md | gx 'bash/b' # 
+echo README.md | gx 'bash/b'
 ```
 
 Load from file instead of STDIN:
